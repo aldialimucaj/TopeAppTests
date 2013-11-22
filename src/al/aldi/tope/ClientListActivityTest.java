@@ -3,6 +3,7 @@ package al.aldi.tope;
 import al.aldi.libjaldi.string.AldiStringUtils;
 import al.aldi.tope.utils.TopeUtils;
 import al.aldi.tope.view.activities.ClientsListActivity;
+import al.aldi.tope.view.activities.ScanServersActivity;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.test.ActivityInstrumentationTestCase2;
@@ -14,7 +15,7 @@ import com.jayway.android.robotium.solo.Solo;
  * Date: 15.11.13
  * Time: 23:46
  * <p/>
- * [Add Description]
+ * Tests for Client List Activity. All tests require at least one server running and listening to default port.
  */
 public class ClientListActivityTest extends ActivityInstrumentationTestCase2<ClientsListActivity> {
     public static final String   TEST_SERVER       = "192.168.178.50";
@@ -123,6 +124,7 @@ public class ClientListActivityTest extends ActivityInstrumentationTestCase2<Cli
         assertTrue(listCount == thirdCount);
     }
 
+
     public void testEditServer() throws Exception {
         boolean newItemAdded = false;
         String activityName = activityUnderTest.getLocalClassName().substring(activityUnderTest.getLocalClassName().lastIndexOf(".") + 1);
@@ -164,5 +166,16 @@ public class ClientListActivityTest extends ActivityInstrumentationTestCase2<Cli
 
         int thirdCount = ((ListActivity) activityUnderTest).getListView().getAdapter().getCount();
         assertTrue(listCount == thirdCount);
+    }
+
+    public void testScanNetwork() throws Exception {
+        String activityName = activityUnderTest.getLocalClassName().substring(activityUnderTest.getLocalClassName().lastIndexOf(".") + 1);
+        solo.assertCurrentActivity("Expected ClientListActivity activity", activityName);
+        solo.sleep(2000);
+        // opening menu and clicking scan network
+        solo.clickOnMenuItem(activityUnderTest.getString(R.string.action_clients_scan_network));
+        solo.sleep(2000);
+        // this is enough to prove that the activity does not crash
+        assertTrue(solo.waitForActivity(ScanServersActivity.class, 3000));
     }
 }

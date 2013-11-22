@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.support.v4.view.ViewPager;
 import android.test.ActivityInstrumentationTestCase2;
-import android.view.KeyEvent;
 import com.jayway.android.robotium.solo.Solo;
 
 /**
@@ -24,6 +23,7 @@ public class TopeTest extends ActivityInstrumentationTestCase2<Tope> {
     private Activity        activityUnderTest = null;
     private Instrumentation mInstrumentation  = null;
     private ViewPager       mViewPager        = null;
+    private Solo            solo              = null;
 
     public TopeTest() {
         super(Tope.class);
@@ -34,6 +34,7 @@ public class TopeTest extends ActivityInstrumentationTestCase2<Tope> {
         super.setUp();
         activityUnderTest = getActivity();
         mInstrumentation = getInstrumentation();
+        solo = new Solo(getInstrumentation(), getActivity());
 
         mViewPager = (ViewPager) activityUnderTest.findViewById(R.id.pager);
     }
@@ -43,26 +44,27 @@ public class TopeTest extends ActivityInstrumentationTestCase2<Tope> {
     }
 
     public void testShowActivityTopeServer() throws Exception {
-        // Adding monitor to listen to activity start
-        Instrumentation.ActivityMonitor am = mInstrumentation.addMonitor(ClientsListActivity.class.getName(), null, false);
-        // Click the menu option
-        mInstrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
-        mInstrumentation.invokeMenuActionSync(activityUnderTest, R.id.action_clients, 0);
-        // Check if the activity was started and close it afterwards
-        Activity a = mInstrumentation.waitForMonitorWithTimeout(am, 1000);
-        assertTrue(mInstrumentation.checkMonitorHit(am, 1));
-        a.finish();
+        String activityName = activityUnderTest.getLocalClassName().substring(activityUnderTest.getLocalClassName().lastIndexOf(".") + 1);
+        solo.assertCurrentActivity("Expected ClientListActivity activity", activityName);
+        solo.sleep(2000);
+        // opening menu and clicking scan network
+        solo.clickOnMenuItem(activityUnderTest.getString(R.string.action_clients));
+        solo.sleep(2000);
+        // this is enough to prove that the activity does not crash
+        assertTrue(solo.waitForActivity(ClientsListActivity.class, 3000));
+        solo.finishOpenedActivities();
     }
 
     public void testShowActivitySettings() throws Exception {
-        Instrumentation.ActivityMonitor am = mInstrumentation.addMonitor(TopeSettingsAcitivity.class.getName(), null, false);
-
-        mInstrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
-        mInstrumentation.invokeMenuActionSync(activityUnderTest, R.id.action_settings, 0);
-
-        Activity settingsActivity = mInstrumentation.waitForMonitorWithTimeout(am, 1000);
-        assertTrue(mInstrumentation.checkMonitorHit(am, 1));
-        settingsActivity.finish();
+        String activityName = activityUnderTest.getLocalClassName().substring(activityUnderTest.getLocalClassName().lastIndexOf(".") + 1);
+        solo.assertCurrentActivity("Expected TopeSettingsActivity activity", activityName);
+        solo.sleep(2000);
+        // opening menu and clicking scan network
+        solo.clickOnMenuItem(activityUnderTest.getString(R.string.action_settings));
+        solo.sleep(2000);
+        // this is enough to prove that the activity does not crash
+        assertTrue(solo.waitForActivity(TopeSettingsAcitivity.class, 3000));
+        solo.finishOpenedActivities();
     }
 
     public void testClickThroughPagerTabStrip() throws Exception {
